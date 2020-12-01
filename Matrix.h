@@ -47,10 +47,8 @@ namespace linal {
         Matrix& operator= (Matrix&& m) noexcept;
 
 
-        Matrix& operator += (const Matrix& m)&;
-        Matrix& operator += (Matrix<T>&& m)&;
+        Matrix& operator += (const Matrix& m)&;       
         Matrix& operator -= (const Matrix& m)&;
-        Matrix& operator -= (Matrix&& m)&;
         Matrix& operator *= (const T& number)&;
         Matrix  operator - () const&;
 
@@ -356,19 +354,8 @@ namespace linal {
             for (size_t j = 0; j < m.columns_; j++)
                 at(i, j) += m.at(i, j);
         }
-    }
-
-    template <typename T>
-    Matrix<T>& Matrix<T>::operator += (Matrix&& m)& {
-
-        if (rows_ != m.rows_ || columns_ != m.columns_)
-            throw std::invalid_argument("the dimensions of the matrices must be the same");
-
-        for (size_t i = 0; i < m.rows_; i++)
-        {
-            for (size_t j = 0; j < m.columns_; j++)
-                at(i, j) += m.at(i, j);
-        }
+        
+        return *this;
     }
 
     template <typename T>
@@ -385,18 +372,6 @@ namespace linal {
         return  *this;
     }
 
-    template <typename T>
-    Matrix<T>& Matrix<T>::operator -= (Matrix<T>&& m)& {
-
-        if (rows_ != m.rows_ || columns_ != m.columns_)
-            throw std::invalid_argument("the dimensions of the matrices must be the same");
-
-        for (size_t i = 0; i < m.rows_; i++)
-        {
-            for (size_t j = 0; j < m.columns_; j++)
-                at(i, j) -= m.at(i, j);
-        }
-    }
 
     template <typename T>
     Matrix<T>& Matrix<T>::operator *= (const T& number)& {
