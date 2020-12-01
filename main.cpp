@@ -1,7 +1,7 @@
 #include "tests.h"
 //#include <gtest/gtest.h>
 
-#define GTESTS
+//#define GTESTS
 
 using namespace linal;
 
@@ -14,11 +14,14 @@ int main(int argc, char *argv[]) {
 
     try {
 
-        Matrix<int> m(10, 10);
-        RandomFill(m, -100, 100);
+        Matrix<int> m;
+        std::cin>>m;
 
+        //std::ifstream istr("../tests/test1.txt");
+        //istr>>m;
+       // RandomFill(m, -100, 100);
+       //  std::cout << m.determinant() << std::endl;
 
-//  std::cout << m.determinant() << std::endl;
         std::cout << m.determinantGaus() << std::endl;
 
     } catch (std::exception& e) {

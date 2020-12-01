@@ -111,12 +111,12 @@ namespace linal {
     template<typename T>
     std::istream& operator>>(std::istream& str, Matrix<T>& m) {
 
-        int r,c;
-        str>>r>>c;
-        m.resize(r,c);
+        int r;
+        str>>r;
+        m.resize(r,r);
 
         for (int i = 0; i < r; i++) {
-            for (int j = 0; j < c; j++)
+            for (int j = 0; j < r; j++)
                 str>>m.at(i,j);
         }
 
