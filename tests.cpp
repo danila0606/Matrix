@@ -1,5 +1,3 @@
-#pragma  once
-
 #include <fstream>
 #include <gtest/gtest.h>
 #include "Matrix.h"
@@ -78,4 +76,48 @@ TEST(DETERMINANT, TEST_INT_2) {
     istr_ans.close();
 
     EXPECT_TRUE( std::abs(res - ans) < std::abs(linal::eps * ans));
+}
+
+TEST(Ctor, t1) {
+
+    struct Widget {
+        int a;
+        double b;
+    };
+
+    Widget w = {1,2.3};
+
+    linal::Matrix<Widget> m(3,3, w);
+
+    EXPECT_TRUE(1 == m.at(1,2).a);
+    EXPECT_TRUE(2.3 == m.at(1,2).b);
+}
+
+TEST(Random, Int) {
+
+
+    linal::Matrix<int> m(5,5);
+
+    for (int i = 0; i < 100; i++) {
+        linal::RandomFill(m, -4, 4);
+
+        auto res1 = m.determinant();
+        auto res2 = m.determinantGaus();
+
+        EXPECT_TRUE(std::abs(res1 - res2) < linal::eps);
+    }
+}
+
+TEST(Random, Double) {
+
+    linal::Matrix<double> m(5,5);
+
+    for(int i = 0; i < 100; i++) {
+        linal::RandomFill(m, -4, 4);
+
+        auto res1 = m.determinant();
+        auto res2 = m.determinantGaus();
+
+        EXPECT_TRUE(std::abs(res1 - res2) < linal::eps);
+    }
 }

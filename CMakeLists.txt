@@ -1,17 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
+
+add_subdirectory(tests)
+
 project(Matrix)
 
-set(CMAKE_CXX_STANDARD 20)
+add_executable(${PROJECT_NAME}  main.cpp Matrix_random.cpp)
 
-#[[add_subdirectory(lib/googletest-master)
-include_directories(lib/googletest-master/googletest/include)
-include_directories(lib/googletest-master/googlemock/include)]]
-
-find_package(GTest REQUIRED)
-find_package(Threads REQUIRED)
-
-add_executable(Matrix main.cpp)
-
-target_link_libraries(${PROJECT_NAME} GTest::GTest GTest::Main Threads::Threads)
-
-#target_link_libraries(Matrix gtest gtest_main)

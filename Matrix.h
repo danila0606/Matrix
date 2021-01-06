@@ -7,7 +7,8 @@
 #include <string>
 #include <cassert>
 #include <iomanip>
-#include <ctime>
+#include <random>
+#include <chrono>
 
 namespace linal {
 
@@ -39,7 +40,7 @@ namespace linal {
         void clear();
 
         template <typename U> void Copy(const Matrix<U>& m) noexcept ;
-        template <typename U> explicit Matrix(const Matrix<U> &m) noexcept;
+        template <typename U> explicit Matrix(const Matrix<U> &m);
         Matrix(const Matrix& m) noexcept;
         Matrix& operator=(const Matrix& m) noexcept;
 
@@ -82,30 +83,9 @@ namespace linal {
 
     };
 
+    void RandomFill(Matrix<int> &m, int d1, int d2);
+    void RandomFill(Matrix<double> &m, int d1, int d2);
 
-    void RandomFill(Matrix<int>& m, int d1, int d2) {
-
-        srand(time(0));
-
-        for (int i = 0; i < m.GetRows(); i++) {
-            for (int j = 0; j < m.GetColumns(); j++)
-                m.at(i,j) = d1 + rand()%(d2 - d1);
-        }
-
-    }
-
-    void RandomFill(Matrix<double>& m, int d1, int d2) {
-
-        srand(time(0));
-
-        for (int i = 0; i < m.GetRows(); i++) {
-            for (int j = 0; j < m.GetColumns(); j++) {
-                double k = (double)rand() / RAND_MAX;
-                m.at(i, j) = d1 + (d2 - d1) * k;
-            }
-        }
-
-    }
     template<typename T>
     std::istream& operator>>(std::istream& str, Matrix<T>& m) {
 
@@ -133,7 +113,8 @@ namespace linal {
         if(!size_)
             data_ = nullptr;
         else {
-            data_ = new T[size_]{value};
+            data_ = new T[size_];
+            std::fill (data_, data_ + size_, value);
 
             // for (int i = 0; i < size_; i++)
             //   data_[i] = value;
@@ -151,7 +132,7 @@ namespace linal {
         const size_t size = elems.size();
 
         if(size_ < size)
-            data_ = nullptr;
+            throw std::invalid_argument("number of elements is more than matrix' size");
         else {
             data_ = new T[size_];
 
@@ -213,7 +194,7 @@ namespace linal {
         if (i >= rows_ || j >= columns_)
             throw std::out_of_range("Out of range");
         else
-            return *(data_ + i * columns_ + j);
+            return data_[i * columns_ + j];
     }
 
 
@@ -236,7 +217,7 @@ namespace linal {
 
     template <typename T>
     template <typename U>
-    Matrix<T>::Matrix(const Matrix<U> &m) noexcept
+    Matrix<T>::Matrix(const Matrix<U> &m)
             : Matrix(m.GetRows(), m.GetColumns()) {
 
         Copy(m);
@@ -733,12 +714,12 @@ namespace linal {
 
     template<typename T>
     Matrix<T>::~Matrix() {
-        delete(data_);
+        delete[] data_;
     }
 
     template<typename T>
     void Matrix<T>::clear() {
-        delete(data_);
+        delete[] data_;
         rows_ = 0;
         columns_ = 0;
         size_ = 0;

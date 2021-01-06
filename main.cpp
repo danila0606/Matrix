@@ -1,11 +1,9 @@
-#include "tests.h"
-//#include <gtest/gtest.h>
-
-//#define GTESTS
+#include "Matrix.h"
+#include <gtest/gtest.h>
 
 using namespace linal;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
 
 #ifdef GTESTS
     ::testing::InitGoogleTest(&argc, argv);
@@ -14,15 +12,10 @@ int main(int argc, char *argv[]) {
 
     try {
 
-        Matrix<int> m;
+        Matrix<double> m;
         std::cin>>m;
 
-        //std::ifstream istr("../tests/test1.txt");
-        //istr>>m;
-       // RandomFill(m, -100, 100);
-       //  std::cout << m.determinant() << std::endl;
-
-        std::cout << m.determinantGaus() << std::endl;
+        std::cout <<std::llround(m.determinantGaus()) << std::endl;
 
     } catch (std::exception& e) {
 
