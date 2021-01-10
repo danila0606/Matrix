@@ -18,7 +18,7 @@ TEST(DETERMINANT, TEST_DOUBLE_1) {
     istr.close();
     istr_ans.close();
 
-    EXPECT_TRUE( std::abs(res - ans) < std::abs(linal::eps * ans));
+    EXPECT_TRUE( std::abs(res - ans) < std::abs(linal::tests_eps * ans));
 }
 
 TEST(DETERMINANT, TEST_INT_1) {
@@ -37,7 +37,7 @@ TEST(DETERMINANT, TEST_INT_1) {
     istr.close();
     istr_ans.close();
 
-    EXPECT_TRUE( std::abs(res - ans) < std::abs(linal::eps * ans));
+    EXPECT_TRUE( std::abs(res - ans) < std::abs(linal::tests_eps * ans));
 }
 
 TEST(DETERMINANT, TEST_DOUBLE_2) {
@@ -56,7 +56,7 @@ TEST(DETERMINANT, TEST_DOUBLE_2) {
     istr.close();
     istr_ans.close();
 
-    EXPECT_TRUE( std::abs(res - ans) < std::abs(linal::eps * ans));
+    EXPECT_TRUE( std::abs(res - ans) < std::abs(linal::tests_eps * ans));
 }
 
 TEST(DETERMINANT, TEST_INT_2) {
@@ -75,7 +75,7 @@ TEST(DETERMINANT, TEST_INT_2) {
     istr.close();
     istr_ans.close();
 
-    EXPECT_TRUE( std::abs(res - ans) < std::abs(linal::eps * ans));
+    EXPECT_TRUE( std::abs(res - ans) < std::abs(linal::tests_eps * ans));
 }
 
 TEST(Ctor, t1) {
@@ -104,7 +104,7 @@ TEST(Random, Int) {
         auto res1 = m.determinant();
         auto res2 = m.determinantGaus();
 
-        EXPECT_TRUE(std::abs(res1 - res2) < linal::eps);
+        EXPECT_TRUE(std::abs(res1 - res2) < linal::tests_eps);
     }
 }
 
@@ -118,6 +118,6 @@ TEST(Random, Double) {
         auto res1 = m.determinant();
         auto res2 = m.determinantGaus();
 
-        EXPECT_TRUE(std::abs(res1 - res2) < linal::eps);
+        EXPECT_TRUE(std::abs(res1 - res2) < linal::tests_eps);
     }
 }

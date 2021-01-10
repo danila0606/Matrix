@@ -12,7 +12,8 @@
 
 namespace linal {
 
-    const double eps = 0.000000001;
+    constexpr double eps = 0.0000001;
+    constexpr double tests_eps = 0.001; // acceptable eps
 
 
     template<typename T = double>
