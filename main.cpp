@@ -12,10 +12,11 @@ int main(int argc, char* argv[]) {
 
     try {
 
-        Matrix<double> m;
+        Matrix<int> m;
         std::cin>>m;
 
-        std::cout <<std::llround(m.determinantGaus()) << std::endl;
+        std::cout <<m.determinantGaus() << std::endl;
+       // std::cout <<m.determinant() << std::endl;
 
     } catch (std::exception& e) {
 

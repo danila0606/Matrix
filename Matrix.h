@@ -12,7 +12,7 @@
 
 namespace linal {
 
-    const double eps = 0.001;
+    const double eps = 0.000000001;
 
 
     template<typename T = double>
@@ -21,8 +21,8 @@ namespace linal {
     public:
 
         Matrix() = default;
-        Matrix(const size_t &rows, const size_t &columns, T value = T{});
-        Matrix(const size_t &rows, const size_t &columns, const std::initializer_list<T> &elems);
+        Matrix(size_t rows, size_t columns, T value = T{});
+        Matrix(size_t rows, size_t columns, const std::initializer_list<T> &elems);
         Matrix(const std::initializer_list<std::initializer_list<T>> &elems);
 
 
@@ -39,13 +39,13 @@ namespace linal {
         void resize(size_t rows, size_t columns);
         void clear();
 
-        template <typename U> void Copy(const Matrix<U>& m) noexcept ;
+        template <typename U> void Copy(const Matrix<U>& m);
         template <typename U> explicit Matrix(const Matrix<U> &m);
-        Matrix(const Matrix& m) noexcept;
-        Matrix& operator=(const Matrix& m) noexcept;
+        Matrix(const Matrix& m) ;
+        Matrix& operator=(const Matrix& m);
 
-        Matrix(Matrix&& m) noexcept;
-        Matrix& operator= (Matrix&& m) noexcept;
+        Matrix(Matrix&& m) ;
+        Matrix& operator= (Matrix&& m) ;
 
 
         Matrix& operator += (const Matrix& m)&;       
@@ -94,8 +94,11 @@ namespace linal {
         m.resize(r,r);
 
         for (int i = 0; i < r; i++) {
-            for (int j = 0; j < r; j++)
-                str>>m.at(i,j);
+            for (int j = 0; j < r; j++) {
+                str >> m.at(i, j);
+                if (!str.good())
+                    throw std::invalid_argument("wrong argument");
+            }
         }
 
         return str;
@@ -104,7 +107,7 @@ namespace linal {
     //................Constructor..........................
 
     template<typename T>
-    Matrix<T>::Matrix(const size_t &rows, const size_t &columns, T value) :
+    Matrix<T>::Matrix(size_t rows, size_t columns, T value) :
             rows_(rows), columns_(columns), size_(rows * columns), capacity_(rows*columns) {
 
         if(rows_ < 0 || columns_ < 0)
@@ -123,7 +126,7 @@ namespace linal {
     }
 
     template<typename T>
-    Matrix<T>::Matrix(const size_t &rows, const size_t &columns, const std::initializer_list<T> &elems) :
+    Matrix<T>::Matrix(size_t rows, size_t columns, const std::initializer_list<T> &elems) :
             rows_(rows), columns_(columns), size_(rows * columns), capacity_(rows*columns) {
 
         if(rows_ < 0 || columns_ < 0)
@@ -202,7 +205,7 @@ namespace linal {
 
     template <typename T>
     template <typename U>
-    void Matrix<T>::Copy(const Matrix<U>& m) noexcept
+    void Matrix<T>::Copy(const Matrix<U>& m)
     {
         const size_t min_row = std::min(rows_, m.GetRows());
         const size_t min_col = std::min(columns_, m.GetColumns());
@@ -224,14 +227,14 @@ namespace linal {
     }
 
     template <typename T>
-    Matrix<T>::Matrix(const Matrix& m) noexcept
+    Matrix<T>::Matrix(const Matrix& m)
             : Matrix(m.rows_, m.columns_)
     {
         Copy(m);
     }
 
     template <typename T>
-    Matrix<T>& Matrix<T>::operator = (const Matrix& m) noexcept
+    Matrix<T>& Matrix<T>::operator = (const Matrix& m)
     {
         if (this == &m)
             return *this;
@@ -246,7 +249,7 @@ namespace linal {
     //..................Copy_end........................
 
     template <typename T>
-    Matrix<T>::Matrix(Matrix&& m) noexcept
+    Matrix<T>::Matrix(Matrix&& m)
             : Matrix()
     {
         std::swap(data_, m.data_);
@@ -261,7 +264,7 @@ namespace linal {
     }
 
     template <typename T>
-    Matrix<T>& Matrix<T>::operator= (Matrix&& m) noexcept {
+    Matrix<T>& Matrix<T>::operator= (Matrix&& m)  {
 
         if (this == &m)
             return *this;
@@ -291,25 +294,24 @@ namespace linal {
         }
 
         if (!data_) {
-            data_ = new T[rows * columns]{T{}};
+            data_ = new T[rows * columns];
             rows_ = rows;
             columns_ = columns;
             size_ = rows * columns;
+            capacity_ = size_;
             return;
         }
 
 
         if (columns_ == columns && columns * rows <= capacity_) {
-            for (size_t k = rows_; k < rows; k++) {
-                for (size_t i = 0; i < columns_; i++)
-                    at(k, i) = T();
-            }
-            rows_ = rows;
 
+            rows_ = rows;
+            size_ = rows_ * columns_;
         }
         else if (rows_ == rows && columns_ >= columns) {
 
             columns_ = columns;
+            size_ = rows_ * columns_;
         }
         else {
             Matrix<T> tmp(rows, columns);
@@ -318,6 +320,7 @@ namespace linal {
         }
 
         size_ = columns * rows;
+        capacity_ = columns * rows;
     }
 
 
@@ -694,7 +697,6 @@ namespace linal {
 
             if (std::abs(copy_m.at(i, i)) < eps)
                 return 0.0;
-
 
             auto elem = static_cast<double>(copy_m.at(i, i));
             for (int r = i + 1; r < rows_; r++) {
