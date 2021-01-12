@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <initializer_list>
 #include <exception>
 #include <cmath>
@@ -10,18 +9,25 @@
 #include <random>
 #include <chrono>
 
+#include "Buf.h"
+
 namespace linal {
 
     constexpr double eps = 0.0000001;
-    constexpr double tests_eps = 0.001; // acceptable eps
+    constexpr double tests_eps = 0.01; // acceptable eps
 
 
     template<typename T = double>
-    class Matrix final {
+class Matrix final : private Buf<T> {
+
+    using Buf<T>::data_;
+    using Buf<T>::used_;
+    using Buf<T>::size_;
 
     public:
 
-        Matrix() = default;
+
+        Matrix();
         Matrix(size_t rows, size_t columns, T value = T{});
         Matrix(size_t rows, size_t columns, const std::initializer_list<T> &elems);
         Matrix(const std::initializer_list<std::initializer_list<T>> &elems);
@@ -34,7 +40,7 @@ namespace linal {
         size_t GetColumns() const noexcept { return columns_; };
         std::pair<size_t, size_t> GetRowsAndColumns() const noexcept { return std::make_pair(rows_, columns_); };
         size_t GetSize() const noexcept {return size_;};
-        size_t GetCapacity() const noexcept {return capacity_;};
+        size_t GetCapacity() const noexcept {return used_;};
         void Print() const;
 
         void resize(size_t rows, size_t columns);
@@ -73,14 +79,11 @@ namespace linal {
         Matrix& negate()&;
         Matrix& transpose()&;
 
-        ~Matrix();
+        ~Matrix() = default;
 
     private:
 
-        T *data_ = nullptr;
-
         size_t rows_{}, columns_{};
-        size_t size_{}, capacity_{};
 
     };
 
@@ -108,27 +111,23 @@ namespace linal {
     //................Constructor..........................
 
     template<typename T>
+    Matrix<T>::Matrix(): Buf<T>(0) {};
+
+    template<typename T>
     Matrix<T>::Matrix(size_t rows, size_t columns, T value) :
-            rows_(rows), columns_(columns), size_(rows * columns), capacity_(rows*columns) {
+            Buf<T>(rows * columns), rows_(rows), columns_(columns) {
 
         if(rows_ < 0 || columns_ < 0)
             throw std::invalid_argument("the dimensions of the matrix must be positive");
 
-        if(!size_)
-            data_ = nullptr;
-        else {
-            data_ = new T[size_];
-            std::fill (data_, data_ + size_, value);
-
-            // for (int i = 0; i < size_; i++)
-            //   data_[i] = value;
-        }
+        for (;used_ < size_; ++used_)
+            new (data_ + used_) T (value);
 
     }
 
     template<typename T>
     Matrix<T>::Matrix(size_t rows, size_t columns, const std::initializer_list<T> &elems) :
-            rows_(rows), columns_(columns), size_(rows * columns), capacity_(rows*columns) {
+            Buf<T>(rows*columns), rows_(rows), columns_(columns) {
 
         if(rows_ < 0 || columns_ < 0)
             throw std::invalid_argument("the dimensions of the matrix must be positive");
@@ -138,23 +137,22 @@ namespace linal {
         if(size_ < size)
             throw std::invalid_argument("number of elements is more than matrix' size");
         else {
-            data_ = new T[size_];
 
             int i = 0;
             for (const auto& elem : elems) {
-                data_[i] = elem;
+                new (data_ + i) T (elem);
                 i++;
             }
 
             for (; i < size_; i++)
-                data_[i] = T{};
+                new (data_ + i) T();
         }
 
     }
 
     template<typename T>
     Matrix<T>::Matrix(const std::initializer_list<std::initializer_list<T>> &elems) :
-            rows_(elems.size()) {
+           Buf<T>(0) ,rows_(elems.size()) {
 
         size_t columns = 0;
 
@@ -162,21 +160,20 @@ namespace linal {
             columns = std::max(columns, row.size());
 
         columns_ = columns;
-        size_ = rows_ * columns_;
-        capacity_ = size_;
 
-        data_ = new T[size_];
+        Matrix<T> tmp(rows_, columns_);
+        Buf<T>::swap(tmp);
 
         int i = 0;
         for (const auto& str : elems) {
             int j = 0;
             for (const auto& elem : str) {
-                at(i, j) = elem;
+                new(&at(i, j)) T(elem);
                 j++;
             }
 
             for (; j < columns_; j++)
-                at(i,j) = T();
+                new(&at(i, j)) T();
 
             i++;
         }
@@ -211,11 +208,28 @@ namespace linal {
         const size_t min_row = std::min(rows_, m.GetRows());
         const size_t min_col = std::min(columns_, m.GetColumns());
 
+        Matrix<T> tmp(rows_, columns_);
+
+       // std::cout<<min_row<<" "<<min_col<<std::endl;
+       // std::cout<<rows_<<" "<<columns_<<std::endl;
+
         for (size_t i = 0; i < min_row; i++)
         {
-            for (size_t k = 0; k < min_col; k++)
-                at(i, k) = m.at(i, k);
+            for (size_t k = 0; k < min_col; k++) {
+                new(&tmp.at(i, k)) T(m.at(i, k));
+                //std::cout<<m.at(i, k)<<" "<<tmp.at(i,k)<<std::endl;
+            }
         }
+
+        for (size_t i = min_row; i < rows_; i++)
+        {
+            for (size_t k = min_col; k < columns_; k++)
+                new (&tmp.at(i, k)) T ();
+        }
+
+        Buf<T>::swap(tmp);
+       // std::cout<<size_<<" "<<used_<<" "<<rows_<<" "<<columns_<<std::endl;
+        //std::cout<<at(0,0)<<std::endl;
 
     }
 
@@ -253,15 +267,9 @@ namespace linal {
     Matrix<T>::Matrix(Matrix&& m)
             : Matrix()
     {
-        std::swap(data_, m.data_);
         rows_ = m.rows_;
         columns_ = m.columns_;
-        size_ = m.size_;
-        capacity_ = m.capacity_;
-
-        m.rows_ = 0;
-        m.columns_ = 0;
-        m.size_ = m.capacity_ = 0;
+        Buf<T>::swap(m);
     }
 
     template <typename T>
@@ -270,17 +278,9 @@ namespace linal {
         if (this == &m)
             return *this;
 
-        std::swap(data_, m.data_);
-
         rows_ = m.rows_;
         columns_ = m.columns_;
-        size_ = m.size_;
-        capacity_ = m.capacity_;
-
-        m.rows_ = 0;
-        m.columns_ = 0;
-        m.size_ = m.capacity_ = 0;
-
+        Buf<T>::swap(m);
         return *this;
     }
 
@@ -295,24 +295,33 @@ namespace linal {
         }
 
         if (!data_) {
-            data_ = new T[rows * columns];
-            rows_ = rows;
-            columns_ = columns;
-            size_ = rows * columns;
-            capacity_ = size_;
+            *this = std::move(Matrix<T>(rows, columns));
             return;
         }
 
 
-        if (columns_ == columns && columns * rows <= capacity_) {
+        if (columns_ == columns && columns * rows <= used_) {
+
+            for (size_t i = rows; i < rows_; i++) {
+                for (size_t j = 0; j < columns_; j++)
+                {
+                    at(i, j).~T();
+                    used_--;
+                }
+            }
 
             rows_ = rows;
-            size_ = rows_ * columns_;
         }
         else if (rows_ == rows && columns_ >= columns) {
 
+            for (size_t i = 0; i < rows_; i++) {
+                for (size_t j = columns; j < columns_; j++)
+                {
+                    at(i, j).~T();
+                    used_--;
+                }
+            }
             columns_ = columns;
-            size_ = rows_ * columns_;
         }
         else {
             Matrix<T> tmp(rows, columns);
@@ -320,8 +329,6 @@ namespace linal {
             *this = std::move(tmp);
         }
 
-        size_ = columns * rows;
-        capacity_ = columns * rows;
     }
 
 
@@ -657,7 +664,7 @@ namespace linal {
     template <typename T>
     double Matrix<T>::determinant() const {
 
-        double res;
+        double res = 0.0;
 
         if (rows_ != columns_)
             throw std::logic_error("Only the square matrix has a determinant");
@@ -681,7 +688,7 @@ namespace linal {
         if (rows_ != columns_)
             throw std::logic_error("Only the square matrix has a determinant");
 
-        Matrix<double> copy_m{*this};
+        Matrix<double> copy_m(*this);
 
         bool sign = false;
         for (int i = 0; i < rows_; i++) {
@@ -712,22 +719,9 @@ namespace linal {
         return copy_m.trace() * res_sign;
     }
 
-
-
-
-    template<typename T>
-    Matrix<T>::~Matrix() {
-        delete[] data_;
-    }
-
     template<typename T>
     void Matrix<T>::clear() {
-        delete[] data_;
-        rows_ = 0;
-        columns_ = 0;
-        size_ = 0;
-        capacity_ = 0;
-        data_ = nullptr;
+        *this = Matrix<T>();
     }
 
     template<typename T>
@@ -735,7 +729,7 @@ namespace linal {
 
         std::cout<<"________________________________________\n";
         std::cout<<"rows: "<<rows_<<" columns: "<<columns_<<"\n";
-        std::cout<<"size: "<<size_<<" capacity: "<<capacity_<<"\n\n";
+        std::cout<<"size: "<<size_<<" used: "<<used_<<"\n\n";
 
         for (int i = 0; i < rows_; i++) {
             for (int j = 0; j < columns_; j++) {

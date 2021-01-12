@@ -1,5 +1,6 @@
 #include "Matrix.h"
 #include <gtest/gtest.h>
+#include <fstream>
 
 using namespace linal;
 
@@ -12,11 +13,12 @@ int main(int argc, char* argv[]) {
 
     try {
 
-        Matrix<int> m;
+        linal::Matrix<double> m;
         std::cin>>m;
 
-        std::cout <<m.determinantGaus() << std::endl;
-       // std::cout <<m.determinant() << std::endl;
+        double res = m.determinantGaus();
+
+        std::cout<<std::round(res)<<std::endl;
 
     } catch (std::exception& e) {
 
