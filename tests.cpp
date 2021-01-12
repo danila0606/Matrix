@@ -5,8 +5,8 @@
 
 TEST(DETERMINANT, TEST_DOUBLE_1) {
 
-    std::ifstream istr("test_det1.txt");
-    std::ifstream istr_ans("test_det1_ans.txt");
+    std::ifstream istr("tests/test_det1.txt");
+    std::ifstream istr_ans("tests/test_det1_ans.txt");
 
     if (!istr.is_open())
         assert(0);
@@ -27,8 +27,8 @@ TEST(DETERMINANT, TEST_DOUBLE_1) {
 
 TEST(DETERMINANT, TEST_INT_1) {
 
-    std::ifstream istr("test_det2.txt");
-    std::ifstream istr_ans("test_det2_ans.txt");
+    std::ifstream istr("tests/test_det2.txt");
+    std::ifstream istr_ans("tests/test_det2_ans.txt");
 
     double ans;
     istr_ans >> ans;
@@ -46,8 +46,8 @@ TEST(DETERMINANT, TEST_INT_1) {
 
 TEST(DETERMINANT, TEST_DOUBLE_2) {
 
-    std::ifstream istr("test_det3.txt");
-    std::ifstream istr_ans("test_det3_ans.txt");
+    std::ifstream istr("tests/test_det3.txt");
+    std::ifstream istr_ans("tests/test_det3_ans.txt");
 
     double ans;
     istr_ans >> ans;
@@ -65,8 +65,8 @@ TEST(DETERMINANT, TEST_DOUBLE_2) {
 
 TEST(DETERMINANT, TEST_INT_2) {
 
-    std::ifstream istr("test_det4.txt");
-    std::ifstream istr_ans("test_det4_ans.txt");
+    std::ifstream istr("tests/test_det4.txt");
+    std::ifstream istr_ans("tests/test_det4_ans.txt");
 
     double ans;
     istr_ans >> ans;
