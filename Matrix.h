@@ -168,12 +168,12 @@ class Matrix final : private Buf<T> {
         for (const auto& str : elems) {
             int j = 0;
             for (const auto& elem : str) {
-                new(&at(i, j)) T(elem);
+                at(i, j) = elem;
                 j++;
             }
 
             for (; j < columns_; j++)
-                new(&at(i, j)) T();
+                at(i, j) = T();
 
             i++;
         }
