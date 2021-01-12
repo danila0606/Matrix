@@ -210,14 +210,11 @@ class Matrix final : private Buf<T> {
 
         Matrix<T> tmp(rows_, columns_);
 
-       // std::cout<<min_row<<" "<<min_col<<std::endl;
-       // std::cout<<rows_<<" "<<columns_<<std::endl;
 
         for (size_t i = 0; i < min_row; i++)
         {
             for (size_t k = 0; k < min_col; k++) {
                 new(&tmp.at(i, k)) T(m.at(i, k));
-                //std::cout<<m.at(i, k)<<" "<<tmp.at(i,k)<<std::endl;
             }
         }
 
@@ -228,9 +225,6 @@ class Matrix final : private Buf<T> {
         }
 
         Buf<T>::swap(tmp);
-       // std::cout<<size_<<" "<<used_<<" "<<rows_<<" "<<columns_<<std::endl;
-        //std::cout<<at(0,0)<<std::endl;
-
     }
 
     template <typename T>
