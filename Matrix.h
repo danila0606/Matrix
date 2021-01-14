@@ -81,7 +81,7 @@ class Matrix final : private Buf<T> {
 
         ~Matrix() = default;
 
-    private:
+private:
 
         size_t rows_{}, columns_{};
 
@@ -162,22 +162,22 @@ class Matrix final : private Buf<T> {
         columns_ = columns;
 
         Matrix<T> tmp(rows_, columns_);
-        Buf<T>::swap(tmp);
 
         int i = 0;
         for (const auto& str : elems) {
             int j = 0;
             for (const auto& elem : str) {
-                at(i, j) = elem;
+                tmp.at(i, j) = elem;
                 j++;
             }
 
             for (; j < columns_; j++)
-                at(i, j) = T();
+                tmp.at(i, j) = T();
 
             i++;
         }
 
+        Buf<T>::swap(tmp);
     }
 
     //................Constructor_end......................
